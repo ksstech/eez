@@ -27,6 +27,12 @@ What belongs here instead:
 - **[docs/qts-helper.md](docs/qts-helper.md)** — the `qts()` query-result
   normalizer copy-pasted into every JavaScript shortcut across all four
   instrument extensions.
+- **[docs/bridge-reliability-patterns.md](docs/bridge-reliability-patterns.md)** —
+  13 reliability/performance patterns for USB-serial → TCP/SCPI → EEZ Studio
+  bridges (USB autosuspend, reconnect strategy, TCP_NODELAY, round-trip
+  batching, VirtualHere coexistence, and more), extracted from building
+  eez-ea-ps2k so they're not re-discovered the hard way for the next
+  instrument.
 - Notes on EEZ Studio version quirks and behavior that isn't obvious from its
   own docs (e.g. `console.log()` producing no output in the 0.28.0 script
   sandbox, `notify.update()` vs dismiss+recreate).
