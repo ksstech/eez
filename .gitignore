@@ -1,1 +1,9 @@
+# Each instrument extension below is its own independent git repo (own
+# remote, own history/tags) nested inside this repo's working tree for
+# convenience — not tracked here, same pattern the top-level z-repo uses.
+/eez-ea-ps2k/
+/eez-keysight-34465a/
+/eez-rigol-dho924s/
+/eez-rigol-mho98/
+
 .DS_Store

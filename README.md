@@ -19,6 +19,12 @@ this repo at all just to get one instrument working.
 | Rigol MHO98 oscilloscope | [ksstech/eez-rigol-mho98](https://github.com/ksstech/eez-rigol-mho98) |
 | Rigol DHO924S oscilloscope | [ksstech/eez-rigol-dho924s](https://github.com/ksstech/eez-rigol-dho924s) |
 
+Each of the four checkouts above lives as a subdirectory of this repo's
+working tree purely for local convenience (one parent folder to open) —
+they are unrelated, independent git repos with their own remotes and
+history, so this repo's `.gitignore` excludes all four by name. Nothing
+about their content or history is duplicated here or vice versa.
+
 What belongs here instead:
 
 - **[docs/eez-live-toast-pattern.md](docs/eez-live-toast-pattern.md)** — the
