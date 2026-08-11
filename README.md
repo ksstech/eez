@@ -19,6 +19,12 @@ this repo at all just to get one instrument working.
 | Rigol MHO98 oscilloscope | [ksstech/eez-rigol-mho98](https://github.com/ksstech/eez-rigol-mho98) |
 | Rigol DHO924S oscilloscope | [ksstech/eez-rigol-dho924s](https://github.com/ksstech/eez-rigol-dho924s) |
 
+Plus one non-instrument extension, sharing the same conventions:
+
+| Extension | Repo |
+|---|---|
+| 1-Wire / I2C / DS248x protocol decode (measurement functions) | [ksstech/eez-protocol-decode](https://github.com/ksstech/eez-protocol-decode) |
+
 Each of the four checkouts above lives as a subdirectory of this repo's
 working tree purely for local convenience (one parent folder to open) —
 they are unrelated, independent git repos with their own remotes and
