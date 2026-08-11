@@ -43,6 +43,11 @@ What belongs here instead:
   the EEZ Studio version this family is baselined against, quirks/workarounds
   tied to specific versions, and the status of upstream `eez-open/studio`
   issues filed as a result of building these extensions.
+- **[docs/installing-extensions.md](docs/installing-extensions.md)** — how to
+  install EEZ Studio itself and download/install an extension zip correctly
+  (covers two easy-to-hit mistakes: grabbing GitHub's "Source code" archive
+  instead of the release asset, and Safari silently auto-unzipping the
+  download).
 
 ## Release workflow (for maintaining the instrument repos)
 
@@ -53,10 +58,21 @@ stay clean across versions:
 
 ```bash
 # from inside the instrument's repo, after bumping the version in package.json
+python3 build-extension-zip.py     # cross-platform, stdlib only — see below
 git tag vX.Y.Z
 git push origin vX.Y.Z
 gh release create vX.Y.Z path/to/built.zip --title "vX.Y.Z" --notes "..."
 ```
+
+`build-extension-zip.py` is copied verbatim into all four instrument repos
+(same reasoning as `qts()` above — no shared module system to import it
+from, and each repo must stay independently buildable without also cloning
+this one). It reads the version straight from `package.json` and always
+writes a flat zip, so it structurally can't produce the single most common
+install failure: `package.json` nested one folder too deep, which is what
+causes EEZ Studio's installer to fail with "Failed to read description".
+See [docs/installing-extensions.md](docs/installing-extensions.md) for the
+end-user download side of that same failure mode.
 
 **Exception:** `eez-ea-ps2k` ships two independently-versioned artifacts (a
 standalone bridge script plus the EEZ Studio extension) since the bridge can
