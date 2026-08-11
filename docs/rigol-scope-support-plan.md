@@ -74,8 +74,8 @@ to contain errors (see 2.1):
 | Channels | 4 | 4 | 4 |
 | Resolution | **12-bit** | 12-bit | 8-bit |
 | Sample rate | 4 GSa/s | **1.25 GSa/s** | 1 GSa/s |
-| Memory | **500 Mpts** | **50 Mpts** | 12 Mpts |
-| Logic analyzer | **16 ch, standard** | 16 ch, optional (PLA2216 probe) | 16 ch std |
+| Memory | **500 Mpts** | **50 Mpts** (series max) | 12 Mpts |
+| Logic analyzer | **16 ch, standard** | 16 ch, standard (via PLA2216 probe; DHO800 series has no LA) | 16 ch std |
 | AWG | **2 ch × 100 MHz** | 1 ch × 25 MHz | 2 ch × 25 MHz |
 | Capture rate | 30k wfms/s (1M fast mode) | up to 1M wfms/s (UltraAcquire) | — |
 | Display | 1024×600 touch | 1024×600 touch | 800×480 |
@@ -129,90 +129,121 @@ before the merge is finalized. If MHO900 turns out to have meaningful
 deltas, they become conditional subsystems — exactly like ":LA Commands
 (Only for MSO1000Z)" in the official family project — not a blocker.
 
-## 4. Plan
+## 4. The complete DHO800 / DHO900 / MHO900 model matrix (vendor-verified)
 
-### Phase 0 — Correct the record (immediate, independent of the rest)
-1. Fix all `eez-rigol-dho924s` README spec errors (§2.1).
-2. Complete `eez-rigol-mho98` README specs (12-bit, 500 Mpts, 16-ch LA,
-   2×100 MHz AWG).
+The single source of per-model variance for everything below. Verified
+against vendor pages on 2026-08-11 (sources under the table). "Owned"
+rows are the two instruments this plan actually targets.
 
-### Phase 1 — Build the shared family source ("generic module")
-3. Obtain the MHO900 programming guide; diff against DHO800/900 guide.
-   Outcome: one confirmed command superset + per-model conditional list.
-4. Create one family repo (working name `eez-rigol-dho-mho`) with a
-   **models table** as the single source of variance:
-   `model | idn-match | bandwidth | channels | sample-rate | memory |
-   LA (std/optional/none) | AWG (2×100M / 1×25M / none) | usb-pid`.
-   Two build options, decide at kickoff:
-   - **(a) EEZ-native**: one `.eez-project` with one `extensionDefinition`
-     per model — identical mechanism to Envox's own
-     `rigol_ds_mso_1000.eez-project`; edited in Studio's IEXT project
-     editor, which also gives a proper SDL/help editing UI.
-   - **(b) Script-generated**: extend our existing `build-extension-zip.py`
-     to emit one zip per row of the models table from shared
-     `.sdl`/`.idf`/shortcut templates — keeps the plain-git,
-     CI-friendly workflow we already run; no Studio dependency.
-   Recommendation: **(a)** — it is the ecosystem-standard format, makes a
-   future upstream contribution to `eez-open/studio-extensions` trivial
-   (the official Rigol family lives there in exactly this form), and the
-   project editor is the only sane way to maintain a 600+ command SDL.
-   Option (b) remains the fallback if the project editor proves
-   impractical.
-5. Initial model coverage: MHO98, DHO924S, DHO924, DHO914S, DHO914
-   (all specs already verified above). The table design must trivially
-   extend to the rest of MHO900 (MHO914/924/954/984) and the DHO800
-   series (same programming guide) — but don't ship models we can't
-   test against real hardware or a manual-verified IDN; list them as
-   "prepared, unverified" rows instead.
+| Series | Model | BW | Ch | ADC | Sample rate | Memory (std/max) | LA (16 ch) | AWG | Notes |
+|---|---|---|---|---|---|---|---|---|---|
+| DHO800 | DHO802 | 70 MHz | **2** | 12-bit | 1.25 GSa/s | 25 Mpts | — | — | hack target |
+| DHO800 | DHO804 | 70 MHz | 4 | 12-bit | 1.25 GSa/s | 25 Mpts | — | — | hack target |
+| DHO800 | DHO812 | 100 MHz | **2** | 12-bit | 1.25 GSa/s | 25 Mpts | — | — | hack target |
+| DHO800 | DHO814 | 100 MHz | 4 | 12-bit | 1.25 GSa/s | 25 Mpts | — | — | hack target |
+| DHO900 | DHO914 | 125 MHz | 4 | 12-bit | 1.25 GSa/s | 50 Mpts | std (PLA2216 probe) | — | |
+| DHO900 | DHO914S | 125 MHz | 4 | 12-bit | 1.25 GSa/s | 50 Mpts | std (PLA2216 probe) | 1×25 MHz | |
+| DHO900 | DHO924 | 250 MHz | 4 | 12-bit | 1.25 GSa/s | 50 Mpts | std (PLA2216 probe) | — | |
+| DHO900 | **DHO924S** | 250 MHz | 4 | 12-bit | 1.25 GSa/s | 50 Mpts | std (PLA2216 probe) | 1×25 MHz | **owned** |
+| MHO900 | MHO934 | 350 MHz | 4 | 12-bit | 4 GSa/s | 100/500 Mpts (opt) | 16 ch (probe) | opt 2-ch 50/100 MHz (+Bode) | Wi-Fi/BT, USB-C |
+| MHO900 | MHO954 | 500 MHz | 4 | 12-bit | 4 GSa/s | 100/500 Mpts (opt) | 16 ch (probe) | opt 2-ch 50/100 MHz (+Bode) | |
+| MHO900 | MHO984 | 800 MHz | 4 | 12-bit | 4 GSa/s | 100/500 Mpts (opt) | 16 ch (probe) | opt 2-ch 50/100 MHz (+Bode) | |
+| MHO900 | **MHO98** | **1 GHz** | 4 | 12-bit | 4 GSa/s | **500 Mpts std** | std | **2×100 MHz std** | **owned**, limited edition, all options std |
 
-### Phase 2 — Close the functional gaps (the union of both ecosystems' strengths)
-6. **SDL expansion**: from ~150 entries to full programming-guide
-   coverage (official family ships 692). This is what powers terminal
-   autocomplete and inline help — the single biggest UX gap vs official
-   extensions.
-7. **docs/ folder**: per-subsystem HTML command reference (official
-   family ships 4.6 MB of it; source material is Rigol's own guide).
-8. **Waveform capture, 12-bit correct**: keep mho98's chunked RAW
-   deep-memory approach but switch `WAVeform:FORMat` from BYTE to
-   **WORD** — BYTE transfers throw away 4 of the 12 bits on these
-   scopes. Port to all family models (dho924s currently has no capture
-   at all). Handle the memory-depth difference (500 Mpts vs 50 Mpts) via
-   the models table.
-9. **LA support** (new for the whole EEZ ecosystem — no existing
-   extension has it): `:LA` subsystem commands + shortcuts (enable/
-   configure/capture digital channels). Standard on MHO98; behind an
-   "optional probe" note for DHO9x4(S).
-10. **AWG parity**: parameterized AWG dialogs from the models table
-    (2×100 MHz vs 1×25 MHz vs absent). dho924s gains AWG control for the
-    first time.
-11. `image.png` for DHO models (dho924s currently ships none).
+Notes, all verified: the MHO900 lineup is **MHO934/954/984 + MHO98
+only** (an earlier revision of this document listed "MHO914/MHO924" —
+those models **do not exist**; they were an unverified naming-pattern
+extrapolation, corrected here). DHO800 models vary in channel count
+(2 vs 4), which any generic table must carry. Community hacks lift
+DHO800 bandwidth/memory toward DHO924 levels while `*IDN?` still
+reports the stock model — relevant to auto-detection below.
 
-### Phase 3 — Fold in the session's quality learnings
-12. Shared toast/`qts()`/SI-formatting patterns (from
-    [eez-live-toast-pattern.md](eez-live-toast-pattern.md) /
-    [qts-helper.md](qts-helper.md)) applied once in the shared source so
-    every model inherits them — including the Stop-button guidance
-    (Scripts tab caveat) and single-toast progress reporting.
-13. Release flow: one repo, one tag, N zip assets on one GitHub Release
-    (build script already guarantees zip-root correctness).
-14. Retire `eez-rigol-mho98` and `eez-rigol-dho924s` as standalone repos
-    once the family repo ships: archive with pointer READMEs (same
-    pattern as the zip→Releases migration), avoiding a split-brain of
-    two sources for the same instruments.
+Sources: [Rigol DHO800](https://www.rigolna.com/products/rigol-digital-oscilloscopes/dho800/),
+[TestEquity DHO802](https://www.testequity.com/product/20002527-DHO802),
+[Meilhaus DHO800](https://www.meilhaus.de/en/rigol-dho800.htm),
+[TestEquity MHO934](https://www.testequity.com/product/20019880-MHO934),
+[Techni-Tool MHO954](https://www.techni-tool.com/product/20019881-MHO954),
+[TestEquity MHO984](https://www.testequity.com/product/20019883-MHO984),
+plus the §2 sources for DHO924S/MHO98.
 
-### Explicitly out of scope for now
-- Upstreaming to `eez-open/studio-extensions` — worth pursuing *after*
-  the family repo is proven on real hardware; choosing build option (a)
-  keeps that door open at near-zero cost.
-- DHO1000/DHO4000 (different programming guide) and non-Rigol scopes.
+## 5. Approach (revised 2026-08-11 — supersedes the original Phase 1–3 plan)
 
-## 5. Decisions (made 2026-08-11)
+**Decision revision, recorded honestly**: an earlier revision of this
+document decided on a new `eez-rigol-dho900` family repo built as an
+`.eez-project`. That is **superseded** (kept below as a deferred option)
+by a KiSS-driven sequential approach: the actual goal is comprehensive,
+stable support for the two owned instruments, and for exactly two
+instruments the family machinery front-loads plumbing (a converter
+script or GUI-manual builds, a new repo, an exemplar-only JSON format)
+before any functional gain.
 
-1. Build mechanism: **(a) `.eez-project`, EEZ-native** — same mechanism as
-   Envox's own `rigol_ds_mso_1000.eez-project`.
-2. Family repo name: **`eez-rigol-dho900`** (named for the shared DHO900
-   platform; MHO900 models included as platform siblings).
-3. Untested sibling models: **not shipped until verified on real hardware
-   or against a manual-verified IDN** — only MHO98 and DHO924S get
-   released zips initially; sibling rows sit prepared in the models
-   table but unbuilt.
+**The approach**: take **MHO98 to 100% first**, in the existing
+`eez-rigol-mho98` repo, then generate **DHO924S as a scripted subset**
+in the existing `eez-rigol-dho924s` repo. Model-specific behavior is
+handled at **runtime**: shortcuts query `*IDN?` at start and select a
+row from an embedded `MODELS` table (schema = §4's columns), so support
+for further models later is a data row, not new code.
+
+Feasibility of the runtime table — every building block verified in EEZ
+Studio 0.29.0 source this session:
+
+- Scripts query `*IDN?` freely (model = 2nd CSV field of the reply).
+- Scripts receive a per-instrument persistent `storage.getItem/setItem`
+  API (verified in `packages/instrument/window/script.ts`,
+  `prepareJavaScriptModules`) — the override path for hacked units
+  whose IDN under-reports their real specs.
+- `input()` dialogs with `type:"enum"` dropdowns — in production use in
+  our own mho98 Vertical/Trigger dialogs.
+- One shared superset SDL is harmless to models lacking a subsystem —
+  the official `rigol_ds_mso_1000` family ships its conditional
+  `:LA`/`:SOURce` subsystems to all 9 models.
+
+Known costs, stated plainly: the shortcut sandbox has **no JS module
+system** (verified — the reason `qts()` is copy-pasted per shortcut), so
+the ~1 KB `MODELS` table is embedded per capability-dependent shortcut;
+kept in sync mechanically because the DHO924S files are *generated* from
+the MHO98 source (hand edits to derived files prohibited). One extra
+query at script start is negligible.
+
+### Step 1 — MHO98 to 100% (`eez-rigol-mho98`)
+Each item is released and user-tested on the real instrument before the
+next starts:
+1. **Command-set source**: fetch the MHO900 programming guide from
+   rigol.com (fallback if unavailable: DHO800/900 guide + our measured
+   mho98-only entries, explicitly flagged as such); extract the command
+   tree. This also produces the MHO900-vs-DHO900 command diff.
+2. **`MODELS` table + `detectModel()`** pasted block: `*IDN?` at script
+   start selects the row; unknown model → notify + safe defaults.
+3. **Capture fidelity**: `WAVeform:FORMat` BYTE → **WORD** (BYTE
+   transfers discard 4 of the 12 bits); chunking re-sized for 2-byte
+   samples; memory limit from the table row (MHO98: 500 Mpts).
+4. **LA support** (first in the EEZ ecosystem): `:LA` SDL subsystem +
+   shortcuts, gated on the table's LA field; iterated on real hardware
+   with the PLA2216 probe.
+5. **AWG completeness** against the guide (2×100 MHz; dialogs exist —
+   verify coverage incl. arbitrary waveforms), gated on the table's AWG
+   fields.
+6. **SDL expansion** toward full guide coverage (official family: 692
+   commands) — generated by script from the extracted command tree, not
+   hand-edited XML.
+7. **docs/ HTML command reference** — stretch goal, last.
+
+### Step 2 — DHO924S as a generated subset (`eez-rigol-dho924s`)
+- New `derive-from-mho98.py`: reads the MHO98 `package.json` + superset
+  SDL, applies transforms (labels/IDN/guid — AWG and LA behavior differ
+  at runtime via the shared `MODELS` table, so script bodies stay
+  identical), emits the dho924s files. Derivation is part of the release
+  procedure; hand edits to derived files prohibited.
+- Add `image.png` (currently missing).
+- User tests on the real DHO924S; release.
+
+### Deferred (documented, unscheduled)
+- DHO800 rows activation + hacked-unit override dialog (storage-backed).
+- MHO934/954/984 rows — data-only additions once verifiable against real
+  hardware or a manual-verified IDN.
+- Single universal extension packaging — requires first verifying how
+  EEZ Studio matches the `.idf`/package.json IDN string (single string;
+  multi-series matching semantics unverified).
+- The `.eez-project` family build and upstreaming to
+  `eez-open/studio-extensions` — revisit only if sibling-model coverage
+  or upstreaming becomes a real goal.
