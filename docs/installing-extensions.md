@@ -54,8 +54,25 @@ this, nothing else. Re-check steps 2's two mistakes above.
 
 ## 4. Install in EEZ Studio
 
-**Extensions Manager → Install → Install from file...**, pick the zip.
+1. On the Home screen, click the puzzle-piece icon (tooltip **"Extensions
+   manager"**) in the left sidebar.
+2. Click the **☰ menu icon** (tooltip "Actions") in the top-right of the
+   Extensions Manager.
+3. Click **"Install Extension"** (tooltip: "Install extension from local
+   file") — this opens a file picker filtered to `.zip`.
+4. Pick the zip you downloaded.
+
 Repeat for each instrument you want.
+
+**Do not use the "Import" button/icon on the Home screen's Instruments
+list.** It looks similar but is a completely different feature — it's for
+importing an *instrument database* (a `.db` file, unrelated to extensions),
+and it will fail with **"Failed to read description"** if you point it at
+an extension `.zip`. That specific error means exactly this: wrong feature,
+not a bad zip — verified straight from EEZ Studio's own source
+([`import-dialog.tsx`](https://github.com/eez-open/studio/blob/master/packages/home/instruments/import-dialog.tsx)
+vs. the real installer,
+[`extensions-manager.tsx`](https://github.com/eez-open/studio/blob/master/packages/home/extensions-manager/extensions-manager.tsx)).
 
 ## For maintainers: building a release zip
 
