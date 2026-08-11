@@ -93,6 +93,31 @@ Trade-offs vs. the EEZ path:
 not translate its code; implement from the Maxim/ADI specifications
 (DS18B20/DS1990A datasheets, AN126, AN937), which is straightforward.
 
+## 4.1 sigrok project health (verified from the repos, 2026-08-11)
+
+Alive, but in **maintenance mode** — measured directly:
+
+| Repo | Last formal release | Commits, last 12 months | Last push |
+|---|---|---|---|
+| PulseView (the GUI) | 0.4.2 — **March 2020** | **1** (a CMake fix) | 2025-11-10 |
+| libsigrok (drivers) | 0.5.2 era; tags now "unreleased" | 29 (Python bindings, Nov 2025) | 2025-11-20 |
+| **libsigrokdecode (the protocol decoders)** | 0.5.3 | **0** | 2024-10-13 |
+
+None archived; the practical distribution is nightly builds (formal
+releases are 6+ years old). Interpretation for our purposes:
+
+- For **using it today** as a 1-Wire debugging stopgap: stagnation
+  barely matters. The relevant decoders (onewire_link/network, i2c,
+  ds243x) are mature, long-stable code; a cheap fx2lafw-class LA remains
+  fully supported. It works now and will keep working.
+- For **building on it**: the decoder library has had zero commits in a
+  year and the GUI one — there is no upstream momentum to co-develop
+  with, new-hardware driver support is slowing, and the stacked
+  device-layer decoders (e.g. the DS18B20 one) are personal third-party
+  repos. This strengthens the case for the EEZ-native decoder as the
+  strategic path, and confirms implementing from the Maxim/ADI specs
+  (there is also no active upstream that a contribution would thrive in).
+
 ## 5. Recommendation (planning input, nothing scheduled)
 
 1. If 1-Wire debugging is needed *now*: a cheap LA + PulseView is the
