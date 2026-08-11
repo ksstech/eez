@@ -118,6 +118,37 @@ releases are 6+ years old). Interpretation for our purposes:
   strategic path, and confirms implementing from the Maxim/ADI specs
   (there is also no active upstream that a contribution would thrive in).
 
+## 4.2 Hassle/viability: from-scratch vs. reusing sigrok (GPL set aside)
+
+Grounded in measured facts: the mature sigrok decoders are small —
+`onewire_link` **347 lines**, `onewire_network` ~180 lines, `i2c`
+**364 lines** of Python (~900 lines total for everything sigrok has
+that we need). The device layers we care most about (DS1990
+interpretation, DS18x20 beyond a third-party repo, RW1990, DS248x
+correlation) largely **don't exist in sigrok** — they must be written
+fresh under every option. Also verified: sigrok-cli decodes from files
+without hardware (`-I csv`/`binary` input modules, logic + analog), so
+"reuse" splits into two distinct sub-options.
+
+| Dimension | (a) From scratch, official specs (NXP UM10204, Maxim AN126/AN937 + datasheets) | (b1) Port sigrok PDs Python→JS | (b2) Wrap sigrok-cli as subprocess |
+|---|---|---|---|
+| Core-layer dev effort | ~900–1200 lines JS (estimate; sigrok's own sizes prove the scale is small) | Comparable — the srd runtime API (`self.wait()` edge/skip semantics, annotation rows) has no JS equivalent and must be re-invented around someone else's structure | Days: CSV/binary export + annotation parsing |
+| Edge-case debugging risk | The real cost of (a) — but neutralized by using sigrok as a **test oracle**: run both on the same captures/sigrok-dumps, diff outputs. Free mature-QA without touching their code (and GPL-clean, making the premise moot) | Inherited edge-case maturity — the one real advantage | Inherited |
+| Fit to EEZ measurement API | Native — written against `IMeasureTask` directly | Poor — translated structure fights the API | Foreign — subprocess + text parsing glued into a measurement script |
+| Deployment | None — ships in the extension | None | **Every bench machine needs a sigrok nightly installed, forever** |
+| Device layers (DS1990/DS18x20/RW1990) | Written fresh | Written fresh (not in sigrok core) | Partially (third-party DS18B20 PD), rest fresh |
+| Differentiators (spec-margin histograms, DS248x I2C↔1-Wire timeline, analog-quality view) | Fully possible | Fully possible, but zero help from ported code | **Dead end** — sigrok has none of it |
+| Upstream future | n/a | Frozen upstream (0 commits/yr in libsigrokdecode) — a one-time copy, never a collaboration | Wrapping a frozen tool |
+| Data volume | in-process | in-process | 10 Mpts captures marshaled through files per decode |
+
+**Verdict**: (a) wins. sigrok's only transferable asset for this job is
+~900 lines of small, simple state machines — and its edge-case maturity
+is fully capturable as a *test oracle* rather than as code. Everything
+of real value (device layers, DS248x correlation, margin analysis,
+analog view) is fresh work under every option. (b2) remains worth
+keeping in the pocket as a days-not-weeks byte-level MVP if an interim
+decode capability is wanted before the native one exists.
+
 ## 5. Recommendation (planning input, nothing scheduled)
 
 1. If 1-Wire debugging is needed *now*: a cheap LA + PulseView is the
