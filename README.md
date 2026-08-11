@@ -39,11 +39,10 @@ What belongs here instead:
   batching, VirtualHere coexistence, and more), extracted from building
   eez-ea-ps2k so they're not re-discovered the hard way for the next
   instrument.
-- Notes on EEZ Studio version quirks and behavior that isn't obvious from its
-  own docs (e.g. `console.log()` producing no output in the 0.28.0 script
-  sandbox, `notify.update()` vs dismiss+recreate).
-- Tracking of upstream `eez-open/studio` issues filed as a result of building
-  these extensions.
+- **[docs/eez-studio-version-notes.md](docs/eez-studio-version-notes.md)** —
+  the EEZ Studio version this family is baselined against, quirks/workarounds
+  tied to specific versions, and the status of upstream `eez-open/studio`
+  issues filed as a result of building these extensions.
 
 ## Release workflow (for maintaining the instrument repos)
 
@@ -58,6 +57,11 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 gh release create vX.Y.Z path/to/built.zip --title "vX.Y.Z" --notes "..."
 ```
+
+**Exception:** `eez-ea-ps2k` ships two independently-versioned artifacts (a
+standalone bridge script plus the EEZ Studio extension) since the bridge can
+be deployed on its own without EEZ Studio — see that repo's own README for
+its two-stream `vX.Y.Z` / `bridge-vX.Y.Z` tagging convention.
 
 ## History note
 
