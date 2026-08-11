@@ -48,6 +48,17 @@ not built from source. One is relevant:
   `scripting sandbox`) and found no matching filed issue as of 2026-08-11.
   Not yet reported upstream. Workaround remains `notify.info()` for
   debugging during development.
+- **`WaveformFormat.RIGOL_WORD` chart rendering is broken** —
+  [eez-open/studio#1037](https://github.com/eez-open/studio/issues/1037),
+  open, filed 2026-08-11. The value accessor in
+  `eez-studio-ui/chart/value-accesor.ts` computes length as bytes/2 but
+  reads single bytes (`values[index]`) instead of assembling 16-bit
+  words — any WORD-format waveform renders garbage. Matters because the
+  12-bit Rigol DHO/MHO scopes only deliver full resolution via
+  `:WAVeform:FORMat WORD`. Workaround (in eez-rigol-mho98's Capture v2):
+  convert WORD data to volts in-script and chart as `FLOATS_32BIT`
+  (format 1); switch back to `RIGOL_WORD` (format 3) when fixed
+  upstream to halve chart memory.
 - **Shortcuts panel crashes for any shortcut with no keybinding** —
   [eez-open/studio#1036](https://github.com/eez-open/studio/issues/1036),
   open, filed 2026-08-11. `Keybinding.render()` in `shortcuts.tsx` calls
