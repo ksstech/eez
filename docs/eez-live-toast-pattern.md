@@ -69,12 +69,25 @@ Stop button in the Scripts panel. Use one toast for all live data.
 
 ### Stop mechanism
 
-`session.isStopped` becomes true when the user clicks Stop. However, the toast
-obscures the Stop button while it is visible. Closing the toast reveals the Stop button.
-Document this in the shortcut comment:
+`session.isStopped` becomes true when the user clicks Stop. Two separate
+things can hide that button, not just the toast — verified in
+`eez-open/studio` source (`script.ts`, `scripts.tsx`, `navigation-store.tsx`):
+
+1. **The toast covers it** while visible — closing the toast reveals it,
+   *if* you're already on the right tab (next point).
+2. **The Stop button only exists in the Scripts tab's own toolbar.**
+   Launching a shortcut from the instrument's quick-access toolbar does
+   **not** switch you to the Scripts tab (`doExecuteShortcut()` only
+   navigates there on a script *error*, never on the normal running path)
+   — if you were on a different tab (Terminal, Shortcuts, etc.) when you
+   launched it, there is no Stop button visible anywhere until you
+   manually click **Scripts** in the left nav.
+
+Document both in the shortcut comment:
 
 ```javascript
-// To stop: close this toast to reveal the Stop button in the Scripts panel.
+// To stop: click "Scripts" in the left nav (if not already there), then
+// close this toast to reveal the Stop button underneath.
 ```
 
 ### Interval tuning

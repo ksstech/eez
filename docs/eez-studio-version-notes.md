@@ -48,6 +48,25 @@ not built from source. One is relevant:
   `scripting sandbox`) and found no matching filed issue as of 2026-08-11.
   Not yet reported upstream. Workaround remains `notify.info()` for
   debugging during development.
+- **Shortcuts panel crashes for any shortcut with no keybinding** —
+  [eez-open/studio#1036](https://github.com/eez-open/studio/issues/1036),
+  open, filed 2026-08-11. `Keybinding.render()` in `shortcuts.tsx` calls
+  `this.props.keybinding.split("+")` with no null-check; any shortcut
+  without a keybinding (completely normal — most toolbar-only shortcuts
+  have none) blanks the whole panel with `TypeError: Cannot read
+  properties of null (reading 'split')`. Not fixable on the extension
+  side — a shortcut needing no keybinding isn't a defect to work around.
+- **Stop button isn't where the toast implies** — running a toolbar
+  shortcut does not switch you to the Scripts tab (verified in
+  `script.ts`: `doExecuteShortcut()` only calls `navigateToScripts()` on a
+  script *error*, never on the normal running path), and the Stop button
+  only renders in the Scripts tab's own toolbar (`toolbarButtonsRender()`
+  in `instrument/window/scripts.tsx`, wired per-nav-item in
+  `navigation-store.tsx`). If you weren't already on the Scripts tab when
+  you launched a live-toast shortcut, closing the toast reveals nothing —
+  you have to manually click **Scripts** in the left nav first, then Stop
+  appears in its toolbar. Not a bug, just non-obvious; documented in
+  [eez-live-toast-pattern.md](eez-live-toast-pattern.md) too.
 
 ## Updating this doc
 
