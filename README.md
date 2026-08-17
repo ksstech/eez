@@ -80,6 +80,20 @@ causes EEZ Studio's installer to fail with "Failed to read description".
 See [docs/installing-extensions.md](docs/installing-extensions.md) for the
 end-user download side of that same failure mode.
 
+**Before every release, compile-check the shortcuts:**
+
+```bash
+node tools/check-shortcuts.js --all
+```
+
+A shortcut's script lives as a JSON *string* inside `package.json`, so a
+JavaScript syntax error is invisible to JSON parsing, to `git diff` and to the
+zip build — it only surfaces when a user clicks the button and gets "Invalid or
+unexpected token". That is exactly how a literal newline inside a string
+literal shipped in `eez-keysight-34465a` v1.0.49/v1.0.50. The checker compiles
+every javascript shortcut inside the same async wrapper EEZ Studio uses, so
+top-level `await` is handled correctly.
+
 **Exception:** `eez-ea-ps2k` ships two independently-versioned artifacts (a
 standalone bridge script plus the EEZ Studio extension) since the bridge can
 be deployed on its own without EEZ Studio — see that repo's own README for
