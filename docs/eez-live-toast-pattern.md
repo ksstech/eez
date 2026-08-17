@@ -67,14 +67,35 @@ This works in EEZ Studio 0.28.0 — it was broken in 0.27.x.
 Two simultaneous toasts (e.g. a hint toast + a data toast) stack and obscure the
 Stop button in the Scripts panel. Use one toast for all live data.
 
+### Position the toast away from the Stop button
+
+Create persistent toasts at `bottom-right`:
+
+```javascript
+var toast = notify.info("...", { autoClose: false, position: "bottom-right" });
+```
+
+`notify.*` passes its options straight through to react-toastify
+(`eez-studio-ui/notification.tsx`), and `ToastPosition` in react-toastify
+10.0.6 (the version EEZ Studio 0.29.0 ships) accepts
+`top-right | top-center | top-left | bottom-right | bottom-center | bottom-left`.
+The default container position is `top-right`, which is exactly where the
+instrument toolbar's Stop button sits — hence the old "close the toast to
+reach Stop" dance. Moving the toast removes the collision entirely, and it
+works on 0.29.0 today with no upgrade.
+
+Suggested by the EEZ Studio maintainer in
+[eez-open/studio#1013](https://github.com/eez-open/studio/issues/1013).
+
 ### Stop mechanism
 
 `session.isStopped` becomes true when the user clicks Stop. Two separate
 things can hide that button, not just the toast — verified in
 `eez-open/studio` source (`script.ts`, `scripts.tsx`, `navigation-store.tsx`):
 
-1. **The toast covers it** while visible — closing the toast reveals it,
-   *if* you're already on the right tab (next point).
+1. **The toast covers it** while visible — unless the toast is created at
+   `position: "bottom-right"` (see above), which is now the recommended
+   practice and removes this cause.
 2. **The Stop button only exists in the Scripts tab's own toolbar.**
    Launching a shortcut from the instrument's quick-access toolbar does
    **not** switch you to the Scripts tab (`doExecuteShortcut()` only
