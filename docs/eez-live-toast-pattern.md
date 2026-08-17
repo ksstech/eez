@@ -25,7 +25,8 @@ const INTERVAL_MS = 100;   // 100 ms works well; increase if instrument is slow
 
 // ── 3. Acquire connection and open a persistent toast ─────────────────────────
 await connection.acquire(true);
-var liveToast = notify.info("▶ Live: connecting...", { autoClose: false });
+var liveToast = notify.info("▶ Live: connecting...",
+    { autoClose: false, position: "bottom-right" });   // see "Position the toast" below
 
 // ── 4. Poll loop ──────────────────────────────────────────────────────────────
 try {
@@ -107,8 +108,9 @@ things can hide that button, not just the toast — verified in
 Document both in the shortcut comment:
 
 ```javascript
-// To stop: click "Scripts" in the left nav (if not already there), then
-// close this toast to reveal the Stop button underneath.
+// To stop: click "Scripts" in the left nav -- the Stop button lives in that
+// section's toolbar. This toast is positioned bottom-right so it does not
+// cover the button.
 ```
 
 ### Interval tuning
