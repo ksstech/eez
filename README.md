@@ -18,6 +18,8 @@ this repo at all just to get one instrument working.
 | Keysight 34465A DMM | [ksstech/eez-keysight-34465a](https://github.com/ksstech/eez-keysight-34465a) |
 | Rigol MHO98 oscilloscope | [ksstech/eez-rigol-mho98](https://github.com/ksstech/eez-rigol-mho98) |
 | Rigol DHO924S oscilloscope | [ksstech/eez-rigol-dho924s](https://github.com/ksstech/eez-rigol-dho924s) |
+| ALIENTEK DP100 USB power supply (USB HID → standard SCPI bridge) | [ksstech/eez-alien-dp100](https://github.com/ksstech/eez-alien-dp100) |
+| ALIENTEK EL15 electronic load (Bluetooth LE → standard SCPI bridge) | [ksstech/eez-alien-el15](https://github.com/ksstech/eez-alien-el15) |
 
 Plus one non-instrument extension, sharing the same conventions:
 
@@ -25,10 +27,15 @@ Plus one non-instrument extension, sharing the same conventions:
 |---|---|
 | 1-Wire / I2C / DS248x protocol decode (measurement functions) | [ksstech/eez-protocol-decode](https://github.com/ksstech/eez-protocol-decode) |
 
-Each of the four checkouts above lives as a subdirectory of this repo's
+Each of the checkouts above lives as a subdirectory of this repo's
 working tree purely for local convenience (one parent folder to open) —
 they are unrelated, independent git repos with their own remotes and
-history, so this repo's `.gitignore` excludes all four by name. Nothing
+history, so this repo's `.gitignore` excludes each by name.
+
+The two ALIENTEK bridges differ from eez-ea-ps2k in one deliberate way:
+they speak standard SCPI-1999 (Keysight E36100B / EL30000 command forms,
+error queue, IEEE 488.2 status model) rather than a SCPI-like dialect, and
+share one parser/server, `scpi_core.py`, copied verbatim into both. Nothing
 about their content or history is duplicated here or vice versa.
 
 What belongs here instead:
@@ -93,6 +100,18 @@ unexpected token". That is exactly how a literal newline inside a string
 literal shipped in `eez-keysight-34465a` v1.0.49/v1.0.50. The checker compiles
 every javascript shortcut inside the same async wrapper EEZ Studio uses, so
 top-level `await` is handled correctly.
+
+**Functionally test a shortcut** against a live instrument or bridge, outside
+EEZ Studio:
+
+```bash
+node tools/run-shortcut.js eez-alien-dp100/eezstudio/package.json "Live" --loops 3
+```
+
+`run-shortcut.js` wraps the script exactly as EEZ Studio does and stands in
+for `connection` (real TCP), `input()` (accepts the dialog defaults, or
+`--answer JSON`), `notify` and `session`. It exits non-zero on a thrown error
+or a `notify.error`.
 
 **Exception:** `eez-ea-ps2k` ships two independently-versioned artifacts (a
 standalone bridge script plus the EEZ Studio extension) since the bridge can
